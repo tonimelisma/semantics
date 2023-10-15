@@ -19,6 +19,9 @@ def generate_and_save_image(prompt):
     )
     base.to(mps_device)
 
+    # Compile base model for performance
+    base.unet = torch.compile(base.unet, mode="reduce-overhead", fullgraph=True)
+
     # Load refiner model
     refiner = DiffusionPipeline.from_pretrained(
         "stabilityai/stable-diffusion-xl-refiner-1.0",
@@ -29,6 +32,9 @@ def generate_and_save_image(prompt):
         variant="fp16",
     )
     refiner.to(mps_device)
+
+    # Compile refiner model for performance
+    refiner.unet = torch.compile(refiner.unet, mode="reduce-overhead", fullgraph=True)
 
     # Define the number of steps and high_noise_frac
     n_steps = 40
